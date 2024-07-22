@@ -1,0 +1,136 @@
+<html>
+  <head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css">
+    <title>Monu sharma</title> 
+    <style>
+
+body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+    }
+    #friendsVideo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    background-color: #000000;
+}
+
+#yourVideo {
+    background-color: #000000;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 45%; /* Adjust as needed for mobile layout */
+    max-width: 300px; /* Limit size to prevent it from taking up too much space */
+    border: 1px solid #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+    height: 24%;
+}
+
+@media (max-width: 768px) { /* Adjust breakpoint as needed for mobile devices */
+    #friendsVideo {
+        width: 100%; /* Take up full width on smaller screens */
+        max-width: none; /* Allow the video to expand to full width */
+        border-radius: 0; /* Remove border radius for full-width video */
+        bottom: 0; /* Align to the bottom of the screen */
+        right: 0; /* Align to the right side of the screen */
+    }
+    
+}
+
+
+button {
+ background-color: #170080;
+  width: 129px;
+  height: 129px;
+  position: fixed;
+  bottom: 5%;
+  border-radius: 50%;
+left: 44%;
+}
+button:hover {
+ background-color: #ff0000;
+  
+}
+.glyphicon {
+        font-size: 50px; /* Adjust the font size as needed */
+   color: #ffffff;
+      }
+    </style>
+  </head>
+  
+  <body onload="showMyFace()">
+    <video id="yourVideo" autoplay muted playsinline></video>
+    <video id="friendsVideo" autoplay playsinline></video>
+    <br />
+    <button onclick="showFriendsFace()" type="button" class=""><span class="glyphicon glyphicon-facetime-video" aria-hidden="true"></span></button>
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase.js"></script>
+  
+  <script>
+    //Create an account on Firebase, and use the credentials they give you in place of the following
+var config = {
+   apiKey: "AIzaSyDgY9qT22cGrA7d46axjzJT5g5EZ2SxsRw",
+  authDomain: "mextube-2b3e3.firebaseapp.com",
+  databaseURL: "https://mextube-2b3e3-default-rtdb.firebaseio.com",
+  projectId: "mextube-2b3e3",
+  storageBucket: "mextube-2b3e3.appspot.com",
+  messagingSenderId: "821910922346",
+  measurementId: "G-DSFTF5NRZF"
+};
+firebase.initializeApp(config);
+
+var database = firebase.database().ref();
+var yourVideo = document.getElementById("yourVideo");
+var friendsVideo = document.getElementById("friendsVideo");
+var yourId = Math.floor(Math.random()*1000000000);
+//Create an account on Viagenie (http://numb.viagenie.ca/), and replace {'urls': 'turn:numb.viagenie.ca','credential': 'websitebeaver','username': 'websitebeaver@email.com'} with the information from your account
+var servers = {'iceServers': [{'urls': 'stun:stun.services.mozilla.com'}, {'urls': 'stun:stun.l.google.com:19302'}, {'urls': 'turn:numb.viagenie.ca','credential': 'beaver','username': 'webrtc.websitebeaver@gmail.com'}]};
+var pc = new RTCPeerConnection(servers);
+pc.onicecandidate = (event => event.candidate?sendMessage(yourId, JSON.stringify({'ice': event.candidate})):console.log("Sent All Ice") );
+pc.onaddstream = (event => friendsVideo.srcObject = event.stream);
+
+function sendMessage(senderId, data) {
+    var msg = database.push({ sender: senderId, message: data });
+    msg.remove();
+}
+
+function readMessage(data) {
+    var msg = JSON.parse(data.val().message);
+    var sender = data.val().sender;
+    if (sender != yourId) {
+        if (msg.ice != undefined)
+            pc.addIceCandidate(new RTCIceCandidate(msg.ice));
+        else if (msg.sdp.type == "offer")
+            pc.setRemoteDescription(new RTCSessionDescription(msg.sdp))
+              .then(() => pc.createAnswer())
+              .then(answer => pc.setLocalDescription(answer))
+              .then(() => sendMessage(yourId, JSON.stringify({'sdp': pc.localDescription})));
+        else if (msg.sdp.type == "answer")
+            pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+    }
+};
+
+database.on('child_added', readMessage);
+
+function showMyFace() {
+  navigator.mediaDevices.getUserMedia({audio:true, video:true})
+    .then(stream => yourVideo.srcObject = stream)
+    .then(stream => pc.addStream(stream));
+}
+
+function showFriendsFace() {
+  pc.createOffer()
+    .then(offer => pc.setLocalDescription(offer) )
+    .then(() => sendMessage(yourId, JSON.stringify({'sdp': pc.localDescription})) );
+}
+  </script>
+</body>
+</html>
