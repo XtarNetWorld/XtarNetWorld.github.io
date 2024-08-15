@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Click Example</title>
+</head>
+<body>
+    <!-- Example HTML structure -->
+    <div class="video-thumbnail" data-category="hd">
+        <div class="thumbnail-overlay" url="inthehtmlthumbnail1">
+            <span class="duration">10:35</span>
+        </div>
+        <img src="HD-wallpaper-loki-season-2-coming-loki-season-2-loki-tv-shows-superheroes-artist-artwork-digital-art-tom-hiddleston.jpg" alt="Video Thumbnail" class="thumbnail" data-url="play5.html" id="unfoldBtn" onclick="minimizeSidebar()">
+    </div>
+
+    <script>
+        // Function to simulate clicks
+        function autoClickElements() {
+            // Click all elements with the class 'thumbnail'
+            const thumbnails = document.querySelectorAll('.video-thumbnail .thumbnail');
+            thumbnails.forEach(thumbnail => {
+                thumbnail.click();
+            });
+
+            // Click all elements with the class 'thumbnail-overlay'
+            const overlays = document.querySelectorAll('.video-thumbnail .thumbnail-overlay');
+            overlays.forEach(overlay => {
+                overlay.click();
+            });
+        }
+
+        // Execute the auto-click function when the page loads
+        window.onload = autoClickElements;
+    </script>
+</body>
+</html>
