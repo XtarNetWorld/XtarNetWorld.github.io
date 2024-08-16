@@ -511,13 +511,12 @@ body {
         background-color: #383838;
     }
 
-    .top-bar-left .website-logo {
+ .top-bar-left .website-logo {
         position: fixed;
-        max-width: 150px;
+        max-width: 110px;
         height: auto;
-        left: 10px;
-        top: 9px;
-    }
+        left: 20px;
+        top: 11px;
 
     body {
         font-family: Arial, sans-serif;
